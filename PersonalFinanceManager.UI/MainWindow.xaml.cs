@@ -13,6 +13,9 @@ using LiveCharts;
 using PersonalFinanceManager.Application.ViewModel;
 using PersonalFinanceManager.Domain.Models;
 using System.ComponentModel;
+using Microsoft.Win32;
+using Serilog;
+using System.IO;
 
 namespace PersonalFinanceManager.UI
 {
@@ -144,6 +147,36 @@ namespace PersonalFinanceManager.UI
                 {
                     VM.DeleteTransaction(selected);
                 }
+            }
+        }
+
+        private void ExportCsv_Click(object sender, RoutedEventArgs e)
+        {
+            var dlg = new SaveFileDialog
+            {
+                Filter = "CSV files (*.csv)|*.csv",
+                DefaultExt = "csv",
+                FileName = "transactions.csv"
+            };
+            if (dlg.ShowDialog() != true) return;
+
+            try
+            {
+                var sb = new StringBuilder();
+                sb.AppendLine("Date,Category,Description,Amount,Type");
+                foreach (var tx in VM.FilteredTransactions)
+                {
+                    var desc = tx.Description?.Replace(",", ";") ?? "";
+                    sb.AppendLine($"{tx.Date:yyyy-MM-dd},{tx.Category},{desc},{tx.Amount},{tx.Type}");
+                }
+                File.WriteAllText(dlg.FileName, sb.ToString(), Encoding.UTF8);
+                MessageBox.Show("Export completed.", "Export CSV", MessageBoxButton.OK, MessageBoxImage.Information);
+                Log.Information("Exported {Count} transactions to {Path}", VM.FilteredTransactions.Count, dlg.FileName);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to export CSV to {Path}", dlg.FileName);
+                MessageBox.Show($"Export failed: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

@@ -50,8 +50,11 @@
                         </ComboBox>
 
                         <Button Content="Clear Filters"
-                    Click="ClearFilters_Click"
-                    Width="100"/>
+                            Click="ClearFilters_Click"
+                            Width="100"/>
+                        <Button Content="Export CSV"
+                            Click="ExportCsv_Click"
+                            Width="100"/>
                     </StackPanel>
 
                     <!-- CRUD BUTTONS -->
