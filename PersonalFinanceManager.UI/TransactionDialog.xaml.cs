@@ -28,7 +28,6 @@ namespace PersonalFinanceManager.UI
 
         private void OkButton_Click(object sender, RoutedEventArgs e)
         {
-            // potrdi dialog, vrne true
             DialogResult = true;
         }
     }

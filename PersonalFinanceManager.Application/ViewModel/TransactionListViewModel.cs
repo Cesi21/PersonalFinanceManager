@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -11,22 +12,106 @@ namespace PersonalFinanceManager.Application.ViewModels
     public class TransactionListViewModel : INotifyPropertyChanged
     {
         private readonly ITransactionRepository _repository;
-        public ObservableCollection<Transaction> Transactions { get; }
+        private List<Transaction> _allTransactions = new();
 
-        public decimal TotalIncome => Transactions.Where(t => t.Type == TransactionType.Income).Sum(t => t.Amount);
-        public decimal TotalExpense => Transactions.Where(t => t.Type == TransactionType.Expense).Sum(t => t.Amount);
+        public ObservableCollection<Transaction> FilteredTransactions { get; }
+
+        // Filters
+
+        private DateTime? _filterStartDate;
+        public DateTime? FilterStartDate
+        {
+            get => _filterStartDate;
+            set
+            {
+                if (_filterStartDate != value)
+                {
+                    _filterStartDate = value;
+                    OnPropertyChanged(nameof(FilterStartDate));
+                    ApplyFilters();
+                }
+            }
+        }
+
+        private DateTime? _filterEndDate;
+        public DateTime? FilterEndDate
+        {
+            get => _filterEndDate;
+            set
+            {
+                if (_filterEndDate != value)
+                {
+                    _filterEndDate = value;
+                    OnPropertyChanged(nameof(FilterEndDate));
+                    ApplyFilters();
+                }
+            }
+        }
+
+        private Category? _filterCategory;
+        public Category? FilterCategory
+        {
+            get => _filterCategory;
+            set
+            {
+                if (_filterCategory != value)
+                {
+                    _filterCategory = value;
+                    OnPropertyChanged(nameof(FilterCategory));
+                    ApplyFilters();
+                }
+            }
+        }
+
+        private TransactionType? _filterType;
+        public TransactionType? FilterType
+        {
+            get => _filterType;
+            set
+            {
+                if (_filterType != value)
+                {
+                    _filterType = value;
+                    OnPropertyChanged(nameof(FilterType));
+                    ApplyFilters();
+                }
+            }
+        }
+
+        // tatistics on filtered set 
+
+        public decimal TotalIncome => FilteredTransactions.Where(t => t.Type == TransactionType.Income).Sum(t => t.Amount);
+        public decimal TotalExpense => FilteredTransactions.Where(t => t.Type == TransactionType.Expense).Sum(t => t.Amount);
         public decimal Balance => TotalIncome - TotalExpense;
+
+        // Grouped data for charts
+
+        public Dictionary<string, double> ExpenseByCategory =>
+            FilteredTransactions
+              .Where(t => t.Type == TransactionType.Expense)
+              .GroupBy(t => t.Category)
+              .ToDictionary(g => g.Key.ToString(), g => (double)g.Sum(t => t.Amount));
+
+        public Dictionary<string, double> IncomeByCategory =>
+            FilteredTransactions
+              .Where(t => t.Type == TransactionType.Income)
+              .GroupBy(t => t.Category)
+              .ToDictionary(g => g.Key.ToString(), g => (double)g.Sum(t => t.Amount));
+
+        // Undo / Redo
+
         private struct UndoRedoItem
         {
             public Action Undo;
             public Action Redo;
         }
-
         private readonly Stack<UndoRedoItem> _undoStack = new();
         private readonly Stack<UndoRedoItem> _redoStack = new();
 
         public bool CanUndo => _undoStack.Any();
         public bool CanRedo => _redoStack.Any();
+
+        // Constructor
 
         public TransactionListViewModel()
             : this(new JsonFileTransactionRepository()) { }
@@ -34,30 +119,31 @@ namespace PersonalFinanceManager.Application.ViewModels
         public TransactionListViewModel(ITransactionRepository repository)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
-            Transactions = new ObservableCollection<Transaction>();
+            FilteredTransactions = new ObservableCollection<Transaction>();
             LoadTransactions();
         }
 
-        public void AddNewTransaction(Transaction transaction)
-        {
-            if (transaction == null) throw new ArgumentNullException(nameof(transaction));
+        // CRUD + Undo/Redo
 
-            // shrani undo/redo zapise
+        public void AddNewTransaction(Transaction tx)
+        {
+            if (tx == null) throw new ArgumentNullException(nameof(tx));
+
             _undoStack.Push(new UndoRedoItem
             {
-                Undo = () => DeleteInternal(transaction),
-                Redo = () => AddInternal(transaction)
+                Undo = () => DeleteInternal(tx),
+                Redo = () => AddInternal(tx)
             });
             _redoStack.Clear();
 
-            AddInternal(transaction);
+            AddInternal(tx);
             NotifyAll();
         }
 
-        public void UpdateExistingTransaction(Transaction transaction)
+        public void UpdateExistingTransaction(Transaction tx)
         {
-            if (transaction == null) throw new ArgumentNullException(nameof(transaction));
-            var old = _repository.GetById(transaction.Id);
+            if (tx == null) throw new ArgumentNullException(nameof(tx));
+            var old = _repository.GetById(tx.Id);
             if (old == null) return;
 
             var backup = new Transaction
@@ -73,27 +159,26 @@ namespace PersonalFinanceManager.Application.ViewModels
             _undoStack.Push(new UndoRedoItem
             {
                 Undo = () => UpdateInternal(backup),
-                Redo = () => UpdateInternal(transaction)
+                Redo = () => UpdateInternal(tx)
             });
             _redoStack.Clear();
 
-            UpdateInternal(transaction);
+            UpdateInternal(tx);
             NotifyAll();
         }
 
-        public void DeleteTransaction(Transaction transaction)
+        public void DeleteTransaction(Transaction tx)
         {
-            if (transaction == null) throw new ArgumentNullException(nameof(transaction));
+            if (tx == null) throw new ArgumentNullException(nameof(tx));
 
-            // kopija za undo
             var backup = new Transaction
             {
-                Id = transaction.Id,
-                Date = transaction.Date,
-                Category = transaction.Category,
-                Type = transaction.Type,
-                Amount = transaction.Amount,
-                Description = transaction.Description
+                Id = tx.Id,
+                Date = tx.Date,
+                Category = tx.Category,
+                Type = tx.Type,
+                Amount = tx.Amount,
+                Description = tx.Description
             };
 
             _undoStack.Push(new UndoRedoItem
@@ -103,7 +188,7 @@ namespace PersonalFinanceManager.Application.ViewModels
             });
             _redoStack.Clear();
 
-            DeleteInternal(transaction);
+            DeleteInternal(tx);
             NotifyAll();
         }
 
@@ -128,20 +213,23 @@ namespace PersonalFinanceManager.Application.ViewModels
         private void AddInternal(Transaction tx)
         {
             _repository.Add(tx);
-            Transactions.Add(tx);
+            _allTransactions.Add(tx);
+            ApplyFilters();
         }
 
         private void UpdateInternal(Transaction tx)
         {
             _repository.Update(tx);
-            LoadTransactions();
+            var idx = _allTransactions.FindIndex(x => x.Id == tx.Id);
+            if (idx >= 0) _allTransactions[idx] = tx;
+            ApplyFilters();
         }
 
         private void DeleteInternal(Transaction tx)
         {
             _repository.Delete(tx.Id);
-            var existing = Transactions.FirstOrDefault(t => t.Id == tx.Id);
-            if (existing != null) Transactions.Remove(existing);
+            _allTransactions.RemoveAll(x => x.Id == tx.Id);
+            ApplyFilters();
         }
 
         private void NotifyAll()
@@ -151,17 +239,34 @@ namespace PersonalFinanceManager.Application.ViewModels
             OnPropertyChanged(nameof(Balance));
             OnPropertyChanged(nameof(CanUndo));
             OnPropertyChanged(nameof(CanRedo));
+            OnPropertyChanged(nameof(ExpenseByCategory));
+            OnPropertyChanged(nameof(IncomeByCategory));
         }
+
+        // Load & Filter
 
         public void LoadTransactions()
         {
-            Transactions.Clear();
-            foreach (var tx in _repository.GetAll())
-                Transactions.Add(tx);
-            OnPropertyChanged(nameof(TotalIncome));
-            OnPropertyChanged(nameof(TotalExpense));
-            OnPropertyChanged(nameof(Balance));
+            _allTransactions = _repository.GetAll().ToList();
+            ApplyFilters();
         }
+
+        private void ApplyFilters()
+        {
+            var filtered = _allTransactions
+                .Where(t => !FilterStartDate.HasValue || t.Date >= FilterStartDate.Value)
+                .Where(t => !FilterEndDate.HasValue || t.Date <= FilterEndDate.Value)
+                .Where(t => !FilterCategory.HasValue || t.Category == FilterCategory.Value)
+                .Where(t => !FilterType.HasValue || t.Type == FilterType.Value)
+                .ToList();
+
+            FilteredTransactions.Clear();
+            foreach (var t in filtered)
+                FilteredTransactions.Add(t);
+
+            NotifyAll();
+        }
+
 
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged(string propName) =>

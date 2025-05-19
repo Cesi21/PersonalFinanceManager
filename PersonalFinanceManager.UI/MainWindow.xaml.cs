@@ -8,6 +8,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using LiveCharts.Wpf;
+using LiveCharts;
 using PersonalFinanceManager.Application.ViewModels;
 using PersonalFinanceManager.Domain.Models;
 
@@ -23,6 +25,42 @@ namespace PersonalFinanceManager.UI
         public MainWindow()
         {
             InitializeComponent();
+            DataContext = new TransactionListViewModel();
+
+            Loaded += (_, __) => RefreshCharts();
+        }
+
+        private void RefreshCharts()
+        {
+            // 1) PieChart za stroške
+            ExpensePieChart.Series = new SeriesCollection(
+                VM.ExpenseByCategory
+                  .Select(kv => new PieSeries
+                  {
+                      Title = kv.Key,
+                      Values = new ChartValues<double> { kv.Value },
+                      DataLabels = true
+                  })
+            );
+
+            // 2) BarChart za prihodke
+            var labels = VM.IncomeByCategory.Keys.ToArray();
+            var values = new ChartValues<double>(VM.IncomeByCategory.Values);
+
+            IncomeBarChart.Series = new SeriesCollection {
+                new ColumnSeries { Title="Prihodki", Values = values }
+            };
+            IncomeBarChart.AxisX.Clear();
+            IncomeBarChart.AxisX.Add(new Axis
+            {
+                Title = "Kategorija",
+                Labels = labels
+            });
+            IncomeBarChart.AxisY.Clear();
+            IncomeBarChart.AxisY.Add(new Axis
+            {
+                Title = "Znesek"
+            });
         }
 
         private void AddButton_Click(object sender, RoutedEventArgs e)
