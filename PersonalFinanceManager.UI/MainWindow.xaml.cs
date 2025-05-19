@@ -25,12 +25,20 @@ namespace PersonalFinanceManager.UI
         public MainWindow()
         {
             InitializeComponent();
+
             DataContext = new TransactionListViewModel();
 
             Loaded += (_, __) => RefreshCharts();
 
-            VM.PropertyChanged += ViewModel_PropertyChanged;
-
+            VM.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName.StartsWith("ExpenseByCategory")
+                 || e.PropertyName.StartsWith("IncomeByCategory")
+                 || e.PropertyName.StartsWith("Filter"))
+                {
+                    RefreshCharts();
+                }
+            };
         }
 
 
@@ -49,42 +57,34 @@ namespace PersonalFinanceManager.UI
 
         private void RefreshCharts()
         {
-            // ––– PieChart (stroški) ––––––––––––––––––––––––––––––––––––––––––––––
+            // ─── PIE CHART Stroški ─────────────────────────────────────────────
             var pieData = VM.ExpenseByCategory; // Dictionary<string,double>
-            ExpensePieChart.Series = new SeriesCollection(
-                pieData.Select(kv =>
-                    new PieSeries
-                    {
-                        Title = kv.Key,
-                        Values = new ChartValues<double> { kv.Value },
-                        DataLabels = true
-                    })
-            );
+            ExpensePieChart.Series.Clear();
+            foreach (var kv in pieData)
+            {
+                ExpensePieChart.Series.Add(new PieSeries
+                {
+                    Title = kv.Key,
+                    Values = new ChartValues<double> { kv.Value },
+                    DataLabels = true,
+                    LabelPoint = cp => $"{cp.Y} ({cp.Participation:P0})"
+                });
+            }
 
-            // ––– BarChart (samo prihodki) –––––––––––––––––––––––––––––––––––––––––
+            // ─── BAR CHART Prihodki ────────────────────────────────────────────
             var labels = VM.IncomeByCategory.Keys.ToArray();
             var values = new ChartValues<double>(VM.IncomeByCategory.Values);
 
-            IncomeBarChart.Series = new SeriesCollection {
-                new ColumnSeries {
-                    Title      = "Prihodki",
-                    Values     = values,
-                    DataLabels = true
-                }
-            };
+            IncomeBarChart.Series.Clear();
+            IncomeBarChart.Series.Add(new ColumnSeries
+            {
+                Title = "Income",
+                Values = values,
+                DataLabels = true
+            });
 
-            // Osveži osi – et voilà, stolpčni graf samo za prihodke
-            IncomeBarChart.AxisX.Clear();
-            IncomeBarChart.AxisX.Add(new Axis
-            {
-                Title = "Kategorija",
-                Labels = labels
-            });
-            IncomeBarChart.AxisY.Clear();
-            IncomeBarChart.AxisY.Add(new Axis
-            {
-                Title = "Znesek"
-            });
+            // Osvežimo osi in nalepke
+            IncomeBarChart.AxisX[0].Labels = labels;
         }
 
         private void AddButton_Click(object sender, RoutedEventArgs e)

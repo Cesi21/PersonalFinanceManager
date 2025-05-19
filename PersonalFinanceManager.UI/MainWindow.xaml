@@ -68,6 +68,7 @@
                   ItemsSource="{Binding FilteredTransactions}"
                   AutoGenerateColumns="False"
                   CanUserAddRows="False"
+                  IsReadOnly="True"
                   SelectionMode="Single">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Date"        Binding="{Binding Date, StringFormat=d}"/>
@@ -94,27 +95,45 @@
         <!-- ====== 2) STATISTICS TAB ====== -->
         <TabItem Header="Statistics">
             <Grid Margin="10">
+                
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <!-- PieChart stroški -->
+                <!-- ===== Stroški (pie) ===== -->
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Expenses"
+                 FontSize="16"
+                 FontWeight="Bold"
+                 HorizontalAlignment="Center"
+                 Margin="0,0,0,5"/>
+                </StackPanel>
+                
                 <lvc:PieChart x:Name="ExpensePieChart"
-                  Grid.Column="0"
-                  LegendLocation="Right"/>
+                    LegendLocation="Right" Grid.Column="0"/>
+                
 
-                <!-- BarChart samo prihodki -->
-                <lvc:CartesianChart x:Name="IncomeBarChart"
-                        Grid.Column="1"
-                        LegendLocation="Right">
-                    <lvc:CartesianChart.AxisX>
-                        <lvc:Axis Title="Kategorija"/>
-                    </lvc:CartesianChart.AxisX>
-                    <lvc:CartesianChart.AxisY>
-                        <lvc:Axis Title="Znesek"/>
-                    </lvc:CartesianChart.AxisY>
-                </lvc:CartesianChart>
+                <!-- ===== Prihodki (bar) ===== -->
+                <StackPanel Grid.Column="1">
+                    <TextBlock Text="Income"
+                 FontSize="16"
+                 FontWeight="Bold"
+                 HorizontalAlignment="Center"
+                 Margin="0,0,0,5"/>
+                </StackPanel>
+                <lvc:CartesianChart x:Name="IncomeBarChart" Grid.Column="1" >
+                        <lvc:CartesianChart.AxisX>
+                            <lvc:Axis Title="Kategorija"/>
+                        </lvc:CartesianChart.AxisX>
+                        <lvc:CartesianChart.AxisY>
+                            <lvc:Axis Title="Znesek"/>
+                        </lvc:CartesianChart.AxisY>
+                    </lvc:CartesianChart>
+                
+                
+                
+                
             </Grid>
         </TabItem>
 
