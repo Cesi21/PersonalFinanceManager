@@ -5,137 +5,144 @@
         xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
         Title="Personal Finance Manager" Height="700" Width="1000">
 
-
-
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
     </Window.Resources>
 
+    <Grid>
+        <TabControl>
 
-    <TabControl>
-        <!-- ====== 1) TRANSACTIONS TAB ====== -->
-        <TabItem Header="Transactions">
-            <Grid Margin="10">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
+            <!-- ====== 1) TRANSACTIONS TAB ====== -->
+            <TabItem Header="Transactions">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
 
-                <!-- FILTER CONTROLS -->
-                <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,10">
-                    <TextBlock Text="From:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                    <DatePicker SelectedDate="{Binding FilterStartDate}" Width="120" Margin="0,0,10,0"/>
-                    <TextBlock Text="To:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                    <DatePicker SelectedDate="{Binding FilterEndDate}" Width="120" Margin="0,0,20,0"/>
+                    <!-- FILTER CONTROLS -->
+                    <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,10">
+                        <TextBlock Text="From:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                        <DatePicker SelectedDate="{Binding FilterStartDate}" Width="120" Margin="0,0,10,0"/>
+                        <TextBlock Text="To:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                        <DatePicker SelectedDate="{Binding FilterEndDate}" Width="120" Margin="0,0,20,0"/>
 
-                    <TextBlock Text="Category:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                    <ComboBox SelectedValue="{Binding FilterCategory}" SelectedValuePath="Tag"
-                    Width="120" Margin="0,0,20,0">
-                        <ComboBoxItem Content="All" Tag="{x:Null}"/>
-                        <ComboBoxItem Content="{x:Static models:Category.Groceries}" Tag="{x:Static models:Category.Groceries}"/>
-                        <ComboBoxItem Content="{x:Static models:Category.Rent}"      Tag="{x:Static models:Category.Rent}"/>
-                        <ComboBoxItem Content="{x:Static models:Category.Salary}"    Tag="{x:Static models:Category.Salary}"/>
-                        <ComboBoxItem Content="{x:Static models:Category.Utilities}" Tag="{x:Static models:Category.Utilities}"/>
-                        <ComboBoxItem Content="{x:Static models:Category.Entertainment}" Tag="{x:Static models:Category.Entertainment}"/>
-                        <ComboBoxItem Content="{x:Static models:Category.Other}"     Tag="{x:Static models:Category.Other}"/>
-                    </ComboBox>
+                        <TextBlock Text="Category:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                        <ComboBox SelectedValue="{Binding FilterCategory}" SelectedValuePath="Tag"
+                      Width="120" Margin="0,0,20,0">
+                            <ComboBoxItem Content="All" Tag="{x:Null}"/>
+                            <ComboBoxItem Content="{x:Static models:Category.Groceries}"    Tag="{x:Static models:Category.Groceries}"/>
+                            <ComboBoxItem Content="{x:Static models:Category.Rent}"         Tag="{x:Static models:Category.Rent}"/>
+                            <ComboBoxItem Content="{x:Static models:Category.Salary}"       Tag="{x:Static models:Category.Salary}"/>
+                            <ComboBoxItem Content="{x:Static models:Category.Utilities}"    Tag="{x:Static models:Category.Utilities}"/>
+                            <ComboBoxItem Content="{x:Static models:Category.Entertainment}"    Tag="{x:Static models:Category.Entertainment}"/>
+                            <ComboBoxItem Content="{x:Static models:Category.Other}"        Tag="{x:Static models:Category.Other}"/>
+                        </ComboBox>
 
-                    <TextBlock Text="Type:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                    <ComboBox SelectedValue="{Binding FilterType}" SelectedValuePath="Tag"
-                    Width="100">
-                        <ComboBoxItem Content="All" Tag="{x:Null}"/>
-                        <ComboBoxItem Content="{x:Static models:TransactionType.Income}"  Tag="{x:Static models:TransactionType.Income}"/>
-                        <ComboBoxItem Content="{x:Static models:TransactionType.Expense}" Tag="{x:Static models:TransactionType.Expense}"/>
-                    </ComboBox>
-                </StackPanel>
+                        <TextBlock Text="Type:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                        <ComboBox SelectedValue="{Binding FilterType}" SelectedValuePath="Tag"
+                      Width="100" Margin="0,0,20,0">
+                            <ComboBoxItem Content="All" Tag="{x:Null}"/>
+                            <ComboBoxItem Content="{x:Static models:TransactionType.Income}"  Tag="{x:Static models:TransactionType.Income}"/>
+                            <ComboBoxItem Content="{x:Static models:TransactionType.Expense}" Tag="{x:Static models:TransactionType.Expense}"/>
+                        </ComboBox>
 
-                <!-- CRUD BUTTONS -->
-                <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,0,0,10">
-                    <Button Content="Add"    Click="AddButton_Click"    Width="75" Margin="0,0,10,0"/>
-                    <Button Content="Edit"   Click="EditButton_Click"   Width="75" Margin="0,0,10,0"/>
-                    <Button Content="Delete" Click="DeleteButton_Click" Width="75" Margin="0,0,10,0"/>
-                    <Button Content="Undo"   Click="UndoButton_Click"   Width="75" Margin="20,0,10,0"
-                  IsEnabled="{Binding CanUndo}"/>
-                    <Button Content="Redo"   Click="RedoButton_Click"   Width="75"
-                  IsEnabled="{Binding CanRedo}"/>
-                </StackPanel>
+                        <Button Content="Clear Filters"
+                    Click="ClearFilters_Click"
+                    Width="100"/>
+                    </StackPanel>
 
-                <!-- DATA GRID -->
-                <DataGrid x:Name="TransactionsDataGrid"
-                  Grid.Row="2"
-                  ItemsSource="{Binding FilteredTransactions}"
-                  AutoGenerateColumns="False"
-                  CanUserAddRows="False"
-                  IsReadOnly="True"
-                  SelectionMode="Single">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Date"        Binding="{Binding Date, StringFormat=d}"/>
-                        <DataGridTextColumn Header="Category"    Binding="{Binding Category}"/>
-                        <DataGridTextColumn Header="Description" Binding="{Binding Description}"/>
-                        <DataGridTextColumn Header="Amount"      Binding="{Binding Amount, StringFormat=C}"/>
-                        <DataGridTextColumn Header="Type"        Binding="{Binding Type}"/>
-                    </DataGrid.Columns>
-                </DataGrid>
+                    <!-- CRUD BUTTONS -->
+                    <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,0,0,10">
+                        <Button Content="Add"    Click="AddButton_Click"    Width="75" Margin="0,0,10,0"/>
+                        <Button Content="Edit"   Click="EditButton_Click"   Width="75" Margin="0,0,10,0"/>
+                        <Button Content="Delete" Click="DeleteButton_Click" Width="75" Margin="0,0,10,0"/>
+                        <Button Content="Undo"   Click="UndoButton_Click"   Width="75" Margin="20,0,10,0"
+                    IsEnabled="{Binding CanUndo}"/>
+                        <Button Content="Redo"   Click="RedoButton_Click"   Width="75"
+                    IsEnabled="{Binding CanRedo}"/>
+                    </StackPanel>
 
-                <!-- FILTERED LIST -->
-                <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
-                    <TextBlock Text="Total Income: " FontWeight="Bold"/>
-                    <TextBlock Text="{Binding TotalIncome, StringFormat=C}" Margin="0,0,20,0"/>
-                    <TextBlock Text="Total Expense: " FontWeight="Bold"/>
-                    <TextBlock Text="{Binding TotalExpense, StringFormat=C}" Margin="0,0,20,0"/>
-                    <TextBlock Text="Balance: " FontWeight="Bold"/>
-                    <TextBlock Text="{Binding Balance, StringFormat=C}"/>
-                </StackPanel>
-            </Grid>
-        </TabItem>
+                    <!-- DATA GRID -->
+                    <DataGrid x:Name="TransactionsDataGrid"
+                    Grid.Row="2"
+                    ItemsSource="{Binding FilteredTransactions}"
+                    AutoGenerateColumns="False"
+                    CanUserAddRows="False"
+                    IsReadOnly="True"
+                    SelectionMode="Single"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Date"        Binding="{Binding Date, StringFormat=d}"/>
+                            <DataGridTextColumn Header="Category"    Binding="{Binding Category}"/>
+                            <DataGridTextColumn Header="Description" Binding="{Binding Description}"/>
+                            <DataGridTextColumn Header="Amount"      Binding="{Binding Amount, StringFormat=C}"/>
+                            <DataGridTextColumn Header="Type"        Binding="{Binding Type}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
 
+                    <!-- SUMMARY STATISTICS -->
+                    <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                        <TextBlock Text="Total Income: "  FontWeight="Bold"/>
+                        <TextBlock Text="{Binding TotalIncome, StringFormat=C}"  Margin="0,0,20,0"/>
+                        <TextBlock Text="Total Expense: " FontWeight="Bold"/>
+                        <TextBlock Text="{Binding TotalExpense, StringFormat=C}" Margin="0,0,20,0"/>
+                        <TextBlock Text="Balance: "       FontWeight="Bold"/>
+                        <TextBlock Text="{Binding Balance, StringFormat=C}"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
 
-        <!-- ====== 2) STATISTICS TAB ====== -->
-        <TabItem Header="Statistics">
-            <Grid Margin="10">
-                
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
+            <!-- ====== 2) STATISTICS TAB ====== -->
+            <TabItem Header="Statistics">
+                <Grid Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
 
-                <!-- ===== Stroški (pie) ===== -->
-                <StackPanel Grid.Column="0">
-                    <TextBlock Text="Expenses"
-                 FontSize="16"
-                 FontWeight="Bold"
-                 HorizontalAlignment="Center"
-                 Margin="0,0,0,5"/>
-                </StackPanel>
-                
-                <lvc:PieChart x:Name="ExpensePieChart"
-                    LegendLocation="Right" Grid.Column="0"/>
-                
+                    <!-- ===== Stroški (pie) ===== -->
+                    <StackPanel Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                        <TextBlock Text="Expenses"
+                       FontSize="16"
+                       FontWeight="Bold"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,5"/>
+                    </StackPanel>
+                    <lvc:PieChart x:Name="ExpensePieChart"
+                          LegendLocation="Right"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Stretch"
+                                  Grid.Column="0"/>
+                    
 
-                <!-- ===== Prihodki (bar) ===== -->
-                <StackPanel Grid.Column="1">
-                    <TextBlock Text="Income"
-                 FontSize="16"
-                 FontWeight="Bold"
-                 HorizontalAlignment="Center"
-                 Margin="0,0,0,5"/>
-                </StackPanel>
-                <lvc:CartesianChart x:Name="IncomeBarChart" Grid.Column="1" >
-                        <lvc:CartesianChart.AxisX>
-                            <lvc:Axis Title="Kategorija"/>
-                        </lvc:CartesianChart.AxisX>
-                        <lvc:CartesianChart.AxisY>
-                            <lvc:Axis Title="Znesek"/>
-                        </lvc:CartesianChart.AxisY>
-                    </lvc:CartesianChart>
-                
-                
-                
-                
-            </Grid>
-        </TabItem>
+                    <!-- ===== Prihodki (bar) ===== -->
+                    <StackPanel Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                        <TextBlock Text="Income"
+                       FontSize="16"
+                       FontWeight="Bold"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,5"/>
+                    </StackPanel>
+                    <lvc:CartesianChart x:Name="IncomeBarChart"
+                                LegendLocation="Right"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                        Grid.Column="1">
+                            <lvc:CartesianChart.AxisX>
+                                <lvc:Axis Title="Kategorija"/>
+                            </lvc:CartesianChart.AxisX>
+                            <lvc:CartesianChart.AxisY>
+                                <lvc:Axis Title="Znesek"/>
+                            </lvc:CartesianChart.AxisY>
+                        </lvc:CartesianChart>
+                    
+                </Grid>
+            </TabItem>
 
-    </TabControl>
+        </TabControl>
+    </Grid>
 </Window>

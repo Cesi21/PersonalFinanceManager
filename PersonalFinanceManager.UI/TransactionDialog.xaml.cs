@@ -28,6 +28,42 @@ namespace PersonalFinanceManager.UI
 
         private void OkButton_Click(object sender, RoutedEventArgs e)
         {
+            if (DatePickerControl.SelectedDate == null)
+            {
+                MessageBox.Show("Izberi datum transakcije.",
+                                "Neveljaven vnos",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Warning);
+                return;
+            }
+
+            if (CategoryComboBox.SelectedValue == null)
+            {
+                MessageBox.Show("Izberi kategorijo.",
+                                "Neveljaven vnos",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Warning);
+                return;
+            }
+
+
+            if (!decimal.TryParse(AmountTextBox.Text, out var amount) || amount <= 0)
+            {
+                MessageBox.Show("Vnesi pozitivno decimalno število za znesek.",
+                                "Neveljaven vnos",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Warning);
+                return;
+            }
+
+
+            if (string.IsNullOrWhiteSpace(DescriptionTextBox.Text))
+            {
+               MessageBox.Show("Neveljaven vnos");
+                return;
+            }
+
+
             DialogResult = true;
         }
     }

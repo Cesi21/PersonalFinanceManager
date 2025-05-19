@@ -19,8 +19,22 @@ public class TransactionListViewModel : INotifyPropertyChanged
 
     public ObservableCollection<Transaction> FilteredTransactions { get; }
 
-    // ─── Filters ───────────────────────────────────────────────────────────────
-    
+    private Transaction Clone(Transaction tx)
+    {
+        return new Transaction
+        {
+            // Let the repo assign a new Guid if tx.Id==Guid.Empty
+            Id = tx.Id,
+            Date = tx.Date,
+            Category = tx.Category,
+            Type = tx.Type,
+            Amount = tx.Amount,
+            Description = tx.Description
+        };
+    }
+
+    // Filters
+
     private DateTime? _filterStartDate;
     public DateTime? FilterStartDate
     {
@@ -81,13 +95,13 @@ public class TransactionListViewModel : INotifyPropertyChanged
         }
     }
 
-    // ─── Statistics on filtered set ────────────────────────────────────────────
+    // Statistics
 
     public decimal TotalIncome => FilteredTransactions.Where(t => t.Type == TransactionType.Income).Sum(t => t.Amount);
     public decimal TotalExpense => FilteredTransactions.Where(t => t.Type == TransactionType.Expense).Sum(t => t.Amount);
     public decimal Balance => TotalIncome - TotalExpense;
 
-    // ─── Grouped data for charts (raw dictionaries) ────────────────────────────
+    // Dictionary for charts
 
     public Dictionary<string, double> ExpenseByCategory =>
         FilteredTransactions
@@ -101,7 +115,7 @@ public class TransactionListViewModel : INotifyPropertyChanged
             .GroupBy(t => t.Category)
             .ToDictionary(g => g.Key.ToString(), g => (double)g.Sum(t => t.Amount));
 
-    // ─── Flags for UI visibility ────────────────────────────────────────────────
+    // Flags for UI visibility
 
     private bool _showExpensesChart = true;
     public bool ShowExpensesChart
@@ -133,7 +147,7 @@ public class TransactionListViewModel : INotifyPropertyChanged
 
   
 
-    // ─── Undo / Redo ───────────────────────────────────────────────────────────
+    // Undo / Redo
 
     private struct UndoRedoItem { public Action Undo; public Action Redo; }
     private readonly Stack<UndoRedoItem> _undoStack = new();
@@ -142,7 +156,7 @@ public class TransactionListViewModel : INotifyPropertyChanged
     public bool CanUndo => _undoStack.Any();
     public bool CanRedo => _redoStack.Any();
 
-    // ─── Constructor ──────────────────────────────────────────────────────────
+    // Constructor
 
     public TransactionListViewModel()
         : this(new JsonFileTransactionRepository()) { }
@@ -155,16 +169,19 @@ public class TransactionListViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(ShowExpensesChart));
     }
 
-    // ─── CRUD + Undo/Redo Methods ─────────────────────────────────────────────
+    // CRUD + Undo/Redo Methods
 
-    public void AddNewTransaction(Transaction tx)
+    public void AddNewTransaction(Transaction transaction)
     {
-        if (tx == null) throw new ArgumentNullException(nameof(tx));
+        if (transaction == null) throw new ArgumentNullException(nameof(transaction));
+
+        // clone before storing
+        var tx = Clone(transaction);
 
         _undoStack.Push(new UndoRedoItem
         {
             Undo = () => DeleteInternal(tx),
-            Redo = () => AddInternal(tx)
+            Redo = () => AddInternal(Clone(tx))
         });
         _redoStack.Clear();
 
@@ -172,46 +189,37 @@ public class TransactionListViewModel : INotifyPropertyChanged
         NotifyAll();
     }
 
-    public void UpdateExistingTransaction(Transaction tx)
+    public void UpdateExistingTransaction(Transaction transaction)
     {
-        if (tx == null) throw new ArgumentNullException(nameof(tx));
-        var old = _repository.GetById(tx.Id);
-        if (old == null) return;
+        if (transaction == null) throw new ArgumentNullException(nameof(transaction));
 
-        var backup = new Transaction
-        {
-            Id = old.Id,
-            Date = old.Date,
-            Category = old.Category,
-            Type = old.Type,
-            Amount = old.Amount,
-            Description = old.Description
-        };
+        // find the stored copy (which we cloned at Add), then clone *that* for our undo
+        var stored = _repository.GetById(transaction.Id);
+        if (stored == null) return;
+
+        var before = Clone(stored);
+        var after = Clone(transaction);
 
         _undoStack.Push(new UndoRedoItem
         {
-            Undo = () => UpdateInternal(backup),
-            Redo = () => UpdateInternal(tx)
+            Undo = () => UpdateInternal(before),
+            Redo = () => UpdateInternal(after)
         });
         _redoStack.Clear();
 
-        UpdateInternal(tx);
+        UpdateInternal(after);
         NotifyAll();
     }
 
-    public void DeleteTransaction(Transaction tx)
+    public void DeleteTransaction(Transaction transaction)
     {
-        if (tx == null) throw new ArgumentNullException(nameof(tx));
+        if (transaction == null) throw new ArgumentNullException(nameof(transaction));
 
-        var backup = new Transaction
-        {
-            Id = tx.Id,
-            Date = tx.Date,
-            Category = tx.Category,
-            Type = tx.Type,
-            Amount = tx.Amount,
-            Description = tx.Description
-        };
+        // again, operate on a clone so the caller’s object can’t mutate our stored copy
+        var stored = _repository.GetById(transaction.Id);
+        if (stored == null) return;
+
+        var backup = Clone(stored);
 
         _undoStack.Push(new UndoRedoItem
         {
@@ -220,7 +228,7 @@ public class TransactionListViewModel : INotifyPropertyChanged
         });
         _redoStack.Clear();
 
-        DeleteInternal(tx);
+        DeleteInternal(stored);
         NotifyAll();
     }
 
@@ -277,7 +285,7 @@ public class TransactionListViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(CanRedo));
     }
 
-    // ─── Load & Filter ─────────────────────────────────────────────────────────
+    // Load & Filter
 
     public void LoadTransactions()
     {
@@ -292,6 +300,8 @@ public class TransactionListViewModel : INotifyPropertyChanged
             .Where(t => !FilterEndDate.HasValue || t.Date <= FilterEndDate.Value)
             .Where(t => !FilterCategory.HasValue || t.Category == FilterCategory.Value)
             .Where(t => !FilterType.HasValue || t.Type == FilterType.Value)
+            .OrderByDescending(t => t.Date)
+            .ThenByDescending(t => t.Amount)      
             .ToList();
 
         FilteredTransactions.Clear();
@@ -301,7 +311,7 @@ public class TransactionListViewModel : INotifyPropertyChanged
         NotifyAll();
     }
 
-    // ─── INotifyPropertyChanged ────────────────────────────────────────────────
+
 
     public event PropertyChangedEventHandler? PropertyChanged;
     protected void OnPropertyChanged(string propName) =>

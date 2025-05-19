@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -11,20 +12,57 @@ namespace PersonalFinanceManager.Infrastructure.Repositories
     public class JsonFileTransactionRepository : ITransactionRepository
     {
         private readonly string _filePath;
-        private readonly List<Transaction> _transactions;
+        private List<Transaction> _transactions;
         private readonly object _lock = new();
 
-        public JsonFileTransactionRepository(string filePath = "transactions.json")
+        public JsonFileTransactionRepository(string? customPath = null)
         {
-            _filePath = filePath;
-            if (File.Exists(_filePath))
+            // 1) Privzeta pot %LOCALAPPDATA%\PersonalFinanceManager\transactions.json
+            if (string.IsNullOrWhiteSpace(customPath))
             {
-                var json = File.ReadAllText(_filePath);
-                _transactions = JsonSerializer.Deserialize<List<Transaction>>(json)
-                                ?? new List<Transaction>();
+                var folder = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "PersonalFinanceManager"
+                );
+                Directory.CreateDirectory(folder);
+                _filePath = Path.Combine(folder, "transactions.json");
             }
             else
             {
+                _filePath = customPath;
+                Directory.CreateDirectory(Path.GetDirectoryName(_filePath)!);
+            }
+
+            Debug.WriteLine($"[JsonRepo] Using file: {_filePath}");
+
+            // 2) Naloži ali inicializiraj
+            if (File.Exists(_filePath))
+            {
+                try
+                {
+                    var json = File.ReadAllText(_filePath);
+                    _transactions = JsonSerializer.Deserialize<List<Transaction>>(json)
+                                 ?? new List<Transaction>();
+                    Debug.WriteLine($"[JsonRepo] Loaded {_transactions.Count} transactions.");
+                }
+                catch (JsonException ex)
+                {
+                    Debug.WriteLine($"[JsonRepo] JSON load failed: {ex.Message}");
+                    // preimenuj poškodovano datoteko v .bak
+                    var backup = _filePath + ".bak";
+                    File.Move(_filePath, backup, overwrite: true);
+                    Debug.WriteLine($"[JsonRepo] Renamed corrupted file to {backup}");
+                    _transactions = new List<Transaction>();
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"[JsonRepo] Unexpected error loading JSON: {ex}");
+                    _transactions = new List<Transaction>();
+                }
+            }
+            else
+            {
+                Debug.WriteLine("[JsonRepo] File not found, starting with empty list.");
                 _transactions = new List<Transaction>();
             }
         }
@@ -76,9 +114,18 @@ namespace PersonalFinanceManager.Infrastructure.Repositories
 
         private void SaveToFile()
         {
-            var opts = new JsonSerializerOptions { WriteIndented = true };
-            var json = JsonSerializer.Serialize(_transactions, opts);
-            File.WriteAllText(_filePath, json);
+            try
+            {
+                var options = new JsonSerializerOptions { WriteIndented = true };
+                var json = JsonSerializer.Serialize(_transactions, options);
+                File.WriteAllText(_filePath, json);
+                Debug.WriteLine($"[JsonRepo] Saved {_transactions.Count} transactions.");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[JsonRepo] Error saving JSON: {ex}");
+                throw;
+            }
         }
     }
 }

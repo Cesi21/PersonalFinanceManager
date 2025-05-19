@@ -44,7 +44,6 @@ namespace PersonalFinanceManager.UI
 
         private void ViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            // Osveži grafe, če se spremeni karkoli, kar vpliva na podatke
             if (e.PropertyName.StartsWith("ExpenseByCategory") ||
                 e.PropertyName.StartsWith("IncomeByCategory") ||
                 e.PropertyName.StartsWith("Filter") ||
@@ -57,7 +56,7 @@ namespace PersonalFinanceManager.UI
 
         private void RefreshCharts()
         {
-            // ─── PIE CHART Stroški ─────────────────────────────────────────────
+            // PIE CHART Stroški
             var pieData = VM.ExpenseByCategory; // Dictionary<string,double>
             ExpensePieChart.Series.Clear();
             foreach (var kv in pieData)
@@ -71,7 +70,7 @@ namespace PersonalFinanceManager.UI
                 });
             }
 
-            // ─── BAR CHART Prihodki ────────────────────────────────────────────
+            // BAR CHART Prihodki
             var labels = VM.IncomeByCategory.Keys.ToArray();
             var values = new ChartValues<double>(VM.IncomeByCategory.Values);
 
@@ -132,8 +131,29 @@ namespace PersonalFinanceManager.UI
         {
             if (TransactionsDataGrid.SelectedItem is Transaction selected)
             {
-                VM.DeleteTransaction(selected);
+                var msg = $"Ali ste prepričani, da želite izbrisati transakcijo:\n\n" +
+                          $"{selected.Date:d} | {selected.Category} | {selected.Description} | {selected.Amount:C}";
+                var result = MessageBox.Show(
+                    msg,
+                    "Potrditev brisanja",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question,
+                    MessageBoxResult.No);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    VM.DeleteTransaction(selected);
+                }
             }
+        }
+
+        private void ClearFilters_Click(object sender, RoutedEventArgs e)
+        {
+            VM.FilterStartDate = null;
+            VM.FilterEndDate = null;
+            VM.FilterCategory = null;
+            VM.FilterType = null;
+            // ApplyFilters() se sproži avtomatsko znotraj setterjev
         }
 
         private void UndoButton_Click(object sender, RoutedEventArgs e)
