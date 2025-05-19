@@ -23,7 +23,7 @@ public class TransactionListViewModel : INotifyPropertyChanged
     {
         return new Transaction
         {
-            // Let the repo assign a new Guid if tx.Id==Guid.Empty
+
             Id = tx.Id,
             Date = tx.Date,
             Category = tx.Category,
@@ -175,7 +175,7 @@ public class TransactionListViewModel : INotifyPropertyChanged
     {
         if (transaction == null) throw new ArgumentNullException(nameof(transaction));
 
-        // clone before storing
+
         var tx = Clone(transaction);
 
         _undoStack.Push(new UndoRedoItem
@@ -193,7 +193,7 @@ public class TransactionListViewModel : INotifyPropertyChanged
     {
         if (transaction == null) throw new ArgumentNullException(nameof(transaction));
 
-        // find the stored copy (which we cloned at Add), then clone *that* for our undo
+
         var stored = _repository.GetById(transaction.Id);
         if (stored == null) return;
 
@@ -215,7 +215,7 @@ public class TransactionListViewModel : INotifyPropertyChanged
     {
         if (transaction == null) throw new ArgumentNullException(nameof(transaction));
 
-        // again, operate on a clone so the caller’s object can’t mutate our stored copy
+
         var stored = _repository.GetById(transaction.Id);
         if (stored == null) return;
 

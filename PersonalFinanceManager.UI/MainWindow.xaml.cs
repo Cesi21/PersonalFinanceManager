@@ -19,9 +19,7 @@ using System.IO;
 
 namespace PersonalFinanceManager.UI
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
+
     public partial class MainWindow : Window
     {
         private TransactionListViewModel VM => (TransactionListViewModel)DataContext;
@@ -84,8 +82,6 @@ namespace PersonalFinanceManager.UI
                 Values = values,
                 DataLabels = true
             });
-
-            // Osvežimo osi in nalepke
             IncomeBarChart.AxisX[0].Labels = labels;
         }
 
@@ -186,7 +182,6 @@ namespace PersonalFinanceManager.UI
             VM.FilterEndDate = null;
             VM.FilterCategory = null;
             VM.FilterType = null;
-            // ApplyFilters() se sproži avtomatsko znotraj setterjev
         }
 
         private void UndoButton_Click(object sender, RoutedEventArgs e)

@@ -44,7 +44,7 @@ namespace PFM.Test.Tests
             var repo = new InMemoryRepo();
             var vm = new TransactionListViewModel(repo);
 
-            // 1) Add
+
             var tx1 = New(DateTime.Today, 100m, TransactionType.Income);
             vm.AddNewTransaction(tx1);
             Assert.Single(vm.FilteredTransactions);
@@ -60,15 +60,15 @@ namespace PFM.Test.Tests
             vm.DeleteTransaction(tx1);
             Assert.Empty(vm.FilteredTransactions);
 
-            // 4) Undo (should restore delete)
+            // 4) Undo 
             vm.Undo();
             Assert.Single(vm.FilteredTransactions);
 
-            // 5) Undo (undo update => back to original 100)
+            // 5) Undo
             vm.Undo();
             Assert.Equal(100m, vm.TotalIncome);
 
-            // 6) Undo (undo add => empty)
+            // 6) Undo
             vm.Undo();
             Assert.Empty(vm.FilteredTransactions);
 
@@ -96,23 +96,19 @@ namespace PFM.Test.Tests
             vm.AddNewTransaction(t2);
             vm.AddNewTransaction(t3);
 
-            // date filter
             vm.FilterStartDate = new DateTime(2025, 2, 1);
             Assert.DoesNotContain(vm.FilteredTransactions, tx => tx.Date < vm.FilterStartDate);
 
-            // category filter
             vm.FilterStartDate = null;
             vm.FilterCategory = Category.Rent;
             Assert.Single(vm.FilteredTransactions);
             Assert.Equal(Category.Rent, vm.FilteredTransactions[0].Category);
-
-            // type filter
+ 
             vm.FilterCategory = null;
             vm.FilterType = TransactionType.Income;
             Assert.Single(vm.FilteredTransactions);
             Assert.Equal(TransactionType.Income, vm.FilteredTransactions[0].Type);
 
-            // clear filters
             vm.FilterType = null;
             Assert.Equal(3, vm.FilteredTransactions.Count);
         }

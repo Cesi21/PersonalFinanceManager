@@ -14,7 +14,6 @@ namespace PersonalFinanceManager.Infrastructure.Repositories
 
         public IEnumerable<Transaction> GetAll()
         {
-            // Vrnemo kopijo, da zaščitimo interno listo
             return _transactions.ToList();
         }
 

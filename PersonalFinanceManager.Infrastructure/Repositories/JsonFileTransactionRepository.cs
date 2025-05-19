@@ -17,7 +17,7 @@ namespace PersonalFinanceManager.Infrastructure.Repositories
 
         public JsonFileTransactionRepository(string? customPath = null)
         {
-            // 1) Privzeta pot %LOCALAPPDATA%\PersonalFinanceManager\transactions.json
+            // Privzeta pot %LOCALAPPDATA%\PersonalFinanceManager\transactions.json
             if (string.IsNullOrWhiteSpace(customPath))
             {
                 var folder = Path.Combine(
@@ -35,7 +35,6 @@ namespace PersonalFinanceManager.Infrastructure.Repositories
 
             Debug.WriteLine($"[JsonRepo] Using file: {_filePath}");
 
-            // 2) Naloži ali inicializiraj
             if (File.Exists(_filePath))
             {
                 try

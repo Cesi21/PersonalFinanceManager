@@ -8,14 +8,10 @@ using Serilog.Sinks.File;
 
 namespace PersonalFinanceManager.UI
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
     public partial class App : System.Windows.Application
     {
         public App()
         {
-            // setup Serilog
             var logDir = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "PersonalFinanceManager",
