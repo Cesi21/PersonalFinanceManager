@@ -27,7 +27,15 @@
                 Width="75" Margin="0,0,10,0"/>
             <Button Content="Delete"
                 Click="DeleteButton_Click"
-                Width="75"/>
+                Width="75" Margin="0,0,10,0"/>
+            <Button Content="Undo"
+                Click="UndoButton_Click"
+                IsEnabled="{Binding CanUndo}"
+                Width="75" Margin="0,0,10,0"/>
+            <Button Content="Redo"
+                Click="RedoButton_Click"
+                IsEnabled="{Binding CanRedo}"
+                Width="75" Margin="0,0,10,0"/>
         </StackPanel>
 
         <!-- Tabela transakcij -->

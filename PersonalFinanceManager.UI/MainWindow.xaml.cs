@@ -73,5 +73,15 @@ namespace PersonalFinanceManager.UI
                 VM.DeleteTransaction(selected);
             }
         }
+
+        private void UndoButton_Click(object sender, RoutedEventArgs e)
+        {
+            VM.Undo();
+        }
+
+        private void RedoButton_Click(object sender, RoutedEventArgs e)
+        {
+            VM.Redo();
+        }
     }
 }
