@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.13.35931.197
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PersonalFinanceManager.UI", "PersonalFinanceManager\PersonalFinanceManager.UI.csproj", "{7E0DF39F-9229-48F3-A908-139C92B7DD6A}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PersonalFinanceManager.Domain", "PersonalFinanceManager.Domain\PersonalFinanceManager.Domain.csproj", "{7B403E42-2EDE-485D-810D-B3C59197ACC8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PersonalFinanceManager.Infrastructure", "PersonalFinanceManager.Infrastructure\PersonalFinanceManager.Infrastructure.csproj", "{4EA63AB3-DE5D-4118-B5BC-B08683978361}"
@@ -13,16 +11,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PersonalFinanceManager.Appl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PFM.Test", "PFM.Test\PFM.Test.csproj", "{EC052B15-6750-45EC-A078-8335735BCC9A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PersonalFinanceManager.UI", "PersonalFinanceManager.UI\PersonalFinanceManager.UI.csproj", "{BA7F5365-0119-4FA0-A1F2-2D60F453EC16}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{7E0DF39F-9229-48F3-A908-139C92B7DD6A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7E0DF39F-9229-48F3-A908-139C92B7DD6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7E0DF39F-9229-48F3-A908-139C92B7DD6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7E0DF39F-9229-48F3-A908-139C92B7DD6A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7B403E42-2EDE-485D-810D-B3C59197ACC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7B403E42-2EDE-485D-810D-B3C59197ACC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7B403E42-2EDE-485D-810D-B3C59197ACC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -39,6 +35,10 @@ Global
 		{EC052B15-6750-45EC-A078-8335735BCC9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EC052B15-6750-45EC-A078-8335735BCC9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EC052B15-6750-45EC-A078-8335735BCC9A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA7F5365-0119-4FA0-A1F2-2D60F453EC16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA7F5365-0119-4FA0-A1F2-2D60F453EC16}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA7F5365-0119-4FA0-A1F2-2D60F453EC16}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA7F5365-0119-4FA0-A1F2-2D60F453EC16}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

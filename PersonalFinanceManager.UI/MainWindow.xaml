@@ -3,7 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:PersonalFinanceManager.Application.ViewModels;assembly=PersonalFinanceManager.Application"
         Title="Personal Finance Manager"
-        Height="500" Width="1000">
+        Height="600" Width="900">
+
+    <!-- Nastavimo ViewModel kot DataContext -->
     <Window.DataContext>
         <vm:TransactionListViewModel/>
     </Window.DataContext>
@@ -18,18 +20,14 @@
         <!-- Gumbi za upravljanje -->
         <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
             <Button Content="Add"
-                    Command="{Binding AddCommand}"
-                    Width="75"
-                    Margin="0,0,10,0"/>
+                Click="AddButton_Click"
+                Width="75" Margin="0,0,10,0"/>
             <Button Content="Edit"
-                    Command="{Binding EditCommand}"
-                    CommandParameter="{Binding SelectedItem, ElementName=TransactionsDataGrid}"
-                    Width="75"
-                    Margin="0,0,10,0"/>
+                Click="EditButton_Click"
+                Width="75" Margin="0,0,10,0"/>
             <Button Content="Delete"
-                    Command="{Binding DeleteCommand}"
-                    CommandParameter="{Binding SelectedItem, ElementName=TransactionsDataGrid}"
-                    Width="75"/>
+                Click="DeleteButton_Click"
+                Width="75"/>
         </StackPanel>
 
         <!-- Tabela transakcij -->
