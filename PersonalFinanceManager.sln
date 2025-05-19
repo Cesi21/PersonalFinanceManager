@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PersonalFinanceManager.Infr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PersonalFinanceManager.Application", "PersonalFinanceManager.Application\PersonalFinanceManager.Application.csproj", "{7C0D43FE-A90F-47B7-B195-F71DB489DD6C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PFM.Test", "PFM.Test\PFM.Test.csproj", "{EC052B15-6750-45EC-A078-8335735BCC9A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{7C0D43FE-A90F-47B7-B195-F71DB489DD6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C0D43FE-A90F-47B7-B195-F71DB489DD6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7C0D43FE-A90F-47B7-B195-F71DB489DD6C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC052B15-6750-45EC-A078-8335735BCC9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC052B15-6750-45EC-A078-8335735BCC9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC052B15-6750-45EC-A078-8335735BCC9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC052B15-6750-45EC-A078-8335735BCC9A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
