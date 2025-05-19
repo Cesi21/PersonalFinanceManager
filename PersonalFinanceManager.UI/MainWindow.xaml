@@ -1,7 +1,6 @@
 ﻿<Window x:Class="PersonalFinanceManager.UI.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="clr-namespace:PersonalFinanceManager.Application.ViewModel;assembly=PersonalFinanceManager.Application"
         xmlns:models="clr-namespace:PersonalFinanceManager.Domain.Models;assembly=PersonalFinanceManager.Domain"
         xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
         Title="Personal Finance Manager" Height="700" Width="1000">
@@ -12,10 +11,6 @@
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
     </Window.Resources>
 
- 
-    <Window.DataContext>
-        <vm:TransactionListViewModel/>
-    </Window.DataContext>
 
     <TabControl>
         <!-- ====== 1) TRANSACTIONS TAB ====== -->
