@@ -94,47 +94,27 @@
         <!-- ====== 2) STATISTICS TAB ====== -->
         <TabItem Header="Statistics">
             <Grid Margin="10">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
 
-                <!-- Checkboxi za prikaz/skrivanje -->
-                <StackPanel Orientation="Horizontal" Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,10">
-                    <CheckBox Content="Prikaži stroške"
-                IsChecked="{Binding ShowExpensesChart}"
-                Margin="0,0,20,0"/>
-                    <CheckBox Content="Prikaži prihodke"
-                IsChecked="{Binding ShowIncomeChart}"/>
-                </StackPanel>
+                <!-- PieChart stroški -->
+                <lvc:PieChart x:Name="ExpensePieChart"
+                  Grid.Column="0"
+                  LegendLocation="Right"/>
 
-                <!-- Grafa drug ob drugem -->
-                <Grid Grid.Row="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- Tortni graf stroškov -->
-                    <lvc:PieChart Grid.Column="0"
-                    Series="{Binding ExpenseByCategorySeries}"
-                    LegendLocation="Right"
-                    Visibility="{Binding ShowExpensesChart, Converter={StaticResource BoolToVis}}"/>
-
-                    <!-- Stolpčni graf prihodkov -->
-                    <lvc:CartesianChart Grid.Column="1"
-                         Series="{Binding IncomeByCategorySeries}"
-                         LegendLocation="Right"
-                         Visibility="{Binding ShowIncomeChart, Converter={StaticResource BoolToVis}}">
-                        <lvc:CartesianChart.AxisX>
-                            <lvc:Axis Labels="{Binding IncomeByCategoryLabels}"
-                    Title="Kategorija"/>
-                        </lvc:CartesianChart.AxisX>
-                        <lvc:CartesianChart.AxisY>
-                            <lvc:Axis Title="Znesek"/>
-                        </lvc:CartesianChart.AxisY>
-                    </lvc:CartesianChart>
-                </Grid>
+                <!-- BarChart samo prihodki -->
+                <lvc:CartesianChart x:Name="IncomeBarChart"
+                        Grid.Column="1"
+                        LegendLocation="Right">
+                    <lvc:CartesianChart.AxisX>
+                        <lvc:Axis Title="Kategorija"/>
+                    </lvc:CartesianChart.AxisX>
+                    <lvc:CartesianChart.AxisY>
+                        <lvc:Axis Title="Znesek"/>
+                    </lvc:CartesianChart.AxisY>
+                </lvc:CartesianChart>
             </Grid>
         </TabItem>
 

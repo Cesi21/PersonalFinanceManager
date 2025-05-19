@@ -12,6 +12,7 @@ using LiveCharts.Wpf;
 using LiveCharts;
 using PersonalFinanceManager.Application.ViewModel;
 using PersonalFinanceManager.Domain.Models;
+using System.ComponentModel;
 
 namespace PersonalFinanceManager.UI
 {
@@ -26,6 +27,64 @@ namespace PersonalFinanceManager.UI
             InitializeComponent();
             DataContext = new TransactionListViewModel();
 
+            Loaded += (_, __) => RefreshCharts();
+
+            VM.PropertyChanged += ViewModel_PropertyChanged;
+
+        }
+
+
+        private void ViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            // Osveži grafe, če se spremeni karkoli, kar vpliva na podatke
+            if (e.PropertyName.StartsWith("ExpenseByCategory") ||
+                e.PropertyName.StartsWith("IncomeByCategory") ||
+                e.PropertyName.StartsWith("Filter") ||
+                e.PropertyName == nameof(VM.ShowExpensesChart) ||
+                e.PropertyName == nameof(VM.ShowIncomeChart))
+            {
+                RefreshCharts();
+            }
+        }
+
+        private void RefreshCharts()
+        {
+            // ––– PieChart (stroški) ––––––––––––––––––––––––––––––––––––––––––––––
+            var pieData = VM.ExpenseByCategory; // Dictionary<string,double>
+            ExpensePieChart.Series = new SeriesCollection(
+                pieData.Select(kv =>
+                    new PieSeries
+                    {
+                        Title = kv.Key,
+                        Values = new ChartValues<double> { kv.Value },
+                        DataLabels = true
+                    })
+            );
+
+            // ––– BarChart (samo prihodki) –––––––––––––––––––––––––––––––––––––––––
+            var labels = VM.IncomeByCategory.Keys.ToArray();
+            var values = new ChartValues<double>(VM.IncomeByCategory.Values);
+
+            IncomeBarChart.Series = new SeriesCollection {
+                new ColumnSeries {
+                    Title      = "Prihodki",
+                    Values     = values,
+                    DataLabels = true
+                }
+            };
+
+            // Osveži osi – et voilà, stolpčni graf samo za prihodke
+            IncomeBarChart.AxisX.Clear();
+            IncomeBarChart.AxisX.Add(new Axis
+            {
+                Title = "Kategorija",
+                Labels = labels
+            });
+            IncomeBarChart.AxisY.Clear();
+            IncomeBarChart.AxisY.Add(new Axis
+            {
+                Title = "Znesek"
+            });
         }
 
         private void AddButton_Click(object sender, RoutedEventArgs e)

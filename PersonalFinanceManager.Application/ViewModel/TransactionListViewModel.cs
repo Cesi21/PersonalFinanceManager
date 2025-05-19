@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using OxyPlot;
+using OxyPlot.Axes;
+using OxyPlot.Series;
 using PersonalFinanceManager.Domain.Models;
 using PersonalFinanceManager.Domain.Repositories;
 using PersonalFinanceManager.Infrastructure.Repositories;
@@ -17,7 +20,7 @@ public class TransactionListViewModel : INotifyPropertyChanged
     public ObservableCollection<Transaction> FilteredTransactions { get; }
 
     // ─── Filters ───────────────────────────────────────────────────────────────
-
+    
     private DateTime? _filterStartDate;
     public DateTime? FilterStartDate
     {
@@ -128,6 +131,8 @@ public class TransactionListViewModel : INotifyPropertyChanged
         }
     }
 
+  
+
     // ─── Undo / Redo ───────────────────────────────────────────────────────────
 
     private struct UndoRedoItem { public Action Undo; public Action Redo; }
@@ -147,6 +152,7 @@ public class TransactionListViewModel : INotifyPropertyChanged
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         FilteredTransactions = new ObservableCollection<Transaction>();
         LoadTransactions();
+        OnPropertyChanged(nameof(ShowExpensesChart));
     }
 
     // ─── CRUD + Undo/Redo Methods ─────────────────────────────────────────────
