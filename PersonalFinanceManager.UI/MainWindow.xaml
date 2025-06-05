@@ -25,12 +25,12 @@
                     <!-- FILTER CONTROLS -->
                     <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,10">
                         <TextBlock Text="From:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                        <DatePicker SelectedDate="{Binding FilterStartDate}" Width="220" Margin="0,0,10,0"/>
+                        <DatePicker SelectedDate="{Binding Transactions.FilterStartDate}" Width="220" Margin="0,0,10,0"/>
                         <TextBlock Text="To:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                        <DatePicker SelectedDate="{Binding FilterEndDate}" Width="220" Margin="0,0,20,0"/>
+                        <DatePicker SelectedDate="{Binding Transactions.FilterEndDate}" Width="220" Margin="0,0,20,0"/>
 
                         <TextBlock Text="Category:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                        <ComboBox SelectedValue="{Binding FilterCategory}" SelectedValuePath="Tag"
+                        <ComboBox SelectedValue="{Binding Transactions.FilterCategory}" SelectedValuePath="Tag"
                       Width="120" Margin="0,0,20,0">
                             <ComboBoxItem Content="All" Tag="{x:Null}"/>
                             <ComboBoxItem Content="{x:Static models:Category.Groceries}"    Tag="{x:Static models:Category.Groceries}"/>
@@ -42,7 +42,7 @@
                         </ComboBox>
 
                         <TextBlock Text="Type:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                        <ComboBox SelectedValue="{Binding FilterType}" SelectedValuePath="Tag"
+                        <ComboBox SelectedValue="{Binding Transactions.FilterType}" SelectedValuePath="Tag"
                       Width="100" Margin="0,0,20,0">
                             <ComboBoxItem Content="All" Tag="{x:Null}"/>
                             <ComboBoxItem Content="{x:Static models:TransactionType.Income}"  Tag="{x:Static models:TransactionType.Income}"/>
@@ -71,7 +71,7 @@
                     <!-- DATA GRID -->
                     <DataGrid x:Name="TransactionsDataGrid"
                     Grid.Row="2"
-                    ItemsSource="{Binding FilteredTransactions}"
+                    ItemsSource="{Binding Transactions.FilteredTransactions}"
                     AutoGenerateColumns="False"
                     CanUserAddRows="False"
                     IsReadOnly="True"
@@ -90,12 +90,36 @@
                     <!-- SUMMARY STATISTICS -->
                     <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
                         <TextBlock Text="Total Income: "  FontWeight="Bold"/>
-                        <TextBlock Text="{Binding TotalIncome, StringFormat=C}"  Margin="0,0,20,0"/>
+                        <TextBlock Text="{Binding Transactions.TotalIncome, StringFormat=C}"  Margin="0,0,20,0"/>
                         <TextBlock Text="Total Expense: " FontWeight="Bold"/>
-                        <TextBlock Text="{Binding TotalExpense, StringFormat=C}" Margin="0,0,20,0"/>
+                        <TextBlock Text="{Binding Transactions.TotalExpense, StringFormat=C}" Margin="0,0,20,0"/>
                         <TextBlock Text="Balance: "       FontWeight="Bold"/>
-                        <TextBlock Text="{Binding Balance, StringFormat=C}"/>
+                        <TextBlock Text="{Binding Transactions.Balance, StringFormat=C}"/>
                     </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <!-- ====== RECURRING TAB ====== -->
+            <TabItem Header="Recurring">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,10">
+                        <Button Content="Add"    Click="AddRecurring_Click" Width="75" Margin="0,0,10,0"/>
+                        <Button Content="Edit"   Click="EditRecurring_Click" Width="75" Margin="0,0,10,0"/>
+                        <Button Content="Delete" Click="DeleteRecurring_Click" Width="75"/>
+                    </StackPanel>
+                    <DataGrid x:Name="RecurringDataGrid" Grid.Row="1" ItemsSource="{Binding Recurring.Items}" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" SelectionMode="Single">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Day" Binding="{Binding DayOfMonth}"/>
+                            <DataGridTextColumn Header="Category" Binding="{Binding Category}"/>
+                            <DataGridTextColumn Header="Description" Binding="{Binding Description}"/>
+                            <DataGridTextColumn Header="Amount" Binding="{Binding Amount, StringFormat=C}"/>
+                            <DataGridTextColumn Header="Type" Binding="{Binding Type}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
                 </Grid>
             </TabItem>
 

@@ -22,16 +22,16 @@ namespace PersonalFinanceManager.UI
 
     public partial class MainWindow : Window
     {
-        private TransactionListViewModel VM => (TransactionListViewModel)DataContext;
+        private MainViewModel VM => (MainViewModel)DataContext;
         public MainWindow()
         {
             InitializeComponent();
 
-            DataContext = new TransactionListViewModel();
+            DataContext = new MainViewModel();
 
             Loaded += (_, __) => RefreshCharts();
 
-            VM.PropertyChanged += (_, e) =>
+            VM.Transactions.PropertyChanged += (_, e) =>
             {
                 if (e.PropertyName.StartsWith("ExpenseByCategory")
                  || e.PropertyName.StartsWith("IncomeByCategory")
@@ -48,8 +48,8 @@ namespace PersonalFinanceManager.UI
             if (e.PropertyName.StartsWith("ExpenseByCategory") ||
                 e.PropertyName.StartsWith("IncomeByCategory") ||
                 e.PropertyName.StartsWith("Filter") ||
-                e.PropertyName == nameof(VM.ShowExpensesChart) ||
-                e.PropertyName == nameof(VM.ShowIncomeChart))
+                e.PropertyName == nameof(TransactionListViewModel.ShowExpensesChart) ||
+                e.PropertyName == nameof(TransactionListViewModel.ShowIncomeChart))
             {
                 RefreshCharts();
             }
@@ -58,7 +58,7 @@ namespace PersonalFinanceManager.UI
         private void RefreshCharts()
         {
             // PIE CHART Stroški
-            var pieData = VM.ExpenseByCategory; // Dictionary<string,double>
+            var pieData = VM.Transactions.ExpenseByCategory; // Dictionary<string,double>
             ExpensePieChart.Series.Clear();
             foreach (var kv in pieData)
             {
@@ -72,8 +72,8 @@ namespace PersonalFinanceManager.UI
             }
 
             // BAR CHART Prihodki
-            var labels = VM.IncomeByCategory.Keys.ToArray();
-            var values = new ChartValues<double>(VM.IncomeByCategory.Values);
+            var labels = VM.Transactions.IncomeByCategory.Keys.ToArray();
+            var values = new ChartValues<double>(VM.Transactions.IncomeByCategory.Values);
 
             IncomeBarChart.Series.Clear();
             IncomeBarChart.Series.Add(new ColumnSeries
@@ -99,7 +99,7 @@ namespace PersonalFinanceManager.UI
             var dlg = new TransactionDialog(newTx) { Owner = this };
             if (dlg.ShowDialog() == true)
             {
-                VM.AddNewTransaction(newTx);
+                VM.Transactions.AddNewTransaction(newTx);
             }
         }
 
@@ -122,7 +122,7 @@ namespace PersonalFinanceManager.UI
             var dlg = new TransactionDialog(clone) { Owner = this };
             if (dlg.ShowDialog() == true)
             {
-                VM.UpdateExistingTransaction(clone);
+                VM.Transactions.UpdateExistingTransaction(clone);
             }
         }
 
@@ -141,7 +141,7 @@ namespace PersonalFinanceManager.UI
 
                 if (result == MessageBoxResult.Yes)
                 {
-                    VM.DeleteTransaction(selected);
+                    VM.Transactions.DeleteTransaction(selected);
                 }
             }
         }
@@ -160,14 +160,14 @@ namespace PersonalFinanceManager.UI
             {
                 var sb = new StringBuilder();
                 sb.AppendLine("Date,Category,Description,Amount,Type");
-                foreach (var tx in VM.FilteredTransactions)
+                foreach (var tx in VM.Transactions.FilteredTransactions)
                 {
                     var desc = tx.Description?.Replace(",", ";") ?? "";
                     sb.AppendLine($"{tx.Date:yyyy-MM-dd},{tx.Category},{desc},{tx.Amount},{tx.Type}");
                 }
                 File.WriteAllText(dlg.FileName, sb.ToString(), Encoding.UTF8);
                 MessageBox.Show("Export completed.", "Export CSV", MessageBoxButton.OK, MessageBoxImage.Information);
-                Log.Information("Exported {Count} transactions to {Path}", VM.FilteredTransactions.Count, dlg.FileName);
+                Log.Information("Exported {Count} transactions to {Path}", VM.Transactions.FilteredTransactions.Count, dlg.FileName);
             }
             catch (Exception ex)
             {
@@ -178,20 +178,65 @@ namespace PersonalFinanceManager.UI
 
         private void ClearFilters_Click(object sender, RoutedEventArgs e)
         {
-            VM.FilterStartDate = null;
-            VM.FilterEndDate = null;
-            VM.FilterCategory = null;
-            VM.FilterType = null;
+            VM.Transactions.FilterStartDate = null;
+            VM.Transactions.FilterEndDate = null;
+            VM.Transactions.FilterCategory = null;
+            VM.Transactions.FilterType = null;
         }
 
         private void UndoButton_Click(object sender, RoutedEventArgs e)
         {
-            VM.Undo();
+            VM.Transactions.Undo();
         }
 
         private void RedoButton_Click(object sender, RoutedEventArgs e)
         {
-            VM.Redo();
+            VM.Transactions.Redo();
+        }
+
+        private void AddRecurring_Click(object sender, RoutedEventArgs e)
+        {
+            var tx = new RecurringTransaction
+            {
+                DayOfMonth = 1,
+                Category = Category.Other,
+                Type = TransactionType.Expense,
+                Amount = 0m,
+                Description = string.Empty
+            };
+            var dlg = new RecurringTransactionDialog(tx) { Owner = this };
+            if (dlg.ShowDialog() == true)
+            {
+                VM.Recurring.Add(tx);
+            }
+        }
+
+        private void EditRecurring_Click(object sender, RoutedEventArgs e)
+        {
+            if (RecurringDataGrid.SelectedItem is not RecurringTransaction selected)
+                return;
+            var clone = new RecurringTransaction
+            {
+                Id = selected.Id,
+                DayOfMonth = selected.DayOfMonth,
+                Category = selected.Category,
+                Type = selected.Type,
+                Amount = selected.Amount,
+                Description = selected.Description
+            };
+            var dlg = new RecurringTransactionDialog(clone) { Owner = this };
+            if (dlg.ShowDialog() == true)
+            {
+                VM.Recurring.Update(clone);
+            }
+        }
+
+        private void DeleteRecurring_Click(object sender, RoutedEventArgs e)
+        {
+            if (RecurringDataGrid.SelectedItem is RecurringTransaction selected)
+            {
+                VM.Recurring.Delete(selected);
+            }
         }
     }
 }
