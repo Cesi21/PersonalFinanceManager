@@ -11,7 +11,7 @@ using PersonalFinanceManager.Domain.Repositories;
 using PersonalFinanceManager.Infrastructure.Repositories;
 
 namespace PersonalFinanceManager.Application.ViewModel;
-
+//Test
 public class TransactionListViewModel : INotifyPropertyChanged
 {
     private readonly ITransactionRepository _repository;
